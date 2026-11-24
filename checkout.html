@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Checkout | Mwananchi Supplies Limited</title>
+<meta name="description" content="Mwananchi Supplies Limited – quality building materials in Kenya: mabati, water tanks, pipes, paints, tiles, carpets, cabro, fencing and concrete mixers. Order on WhatsApp.">
+<meta property="og:image" content="images/banner.jpg"><meta name="theme-color" content="#061a42">
+<link rel="icon" href="images/favicon.png"><link rel="stylesheet" href="style.css"></head>
+<body data-page="checkout">
+
+<div class="ph"><h1>Checkout</h1><p>Your order is sent to us on WhatsApp</p></div>
+<section><div class="wrap" id="cobox"><div class="co"><div class="box form"><h2 style="color:var(--navy)">Your details</h2>
+<label>Full name</label><input id="fn" placeholder="e.g. John Kamau" autocomplete="name"><div class="err">Enter your full name</div>
+<label>Phone number</label><input id="fp" type="tel" placeholder="07XX XXX XXX" autocomplete="tel"><div class="err">Enter a valid Kenyan phone number</div>
+<label>County</label><select id="county"></select><div class="err">Select your county</div>
+<label>Location / Town / Estate</label><input id="fl" placeholder="e.g. Ruiru, Kimbo Estate"><div class="err">Enter your delivery location</div>
+<label>Notes (optional)</label><textarea id="fnote" rows="2" placeholder="Delivery instructions, colour, size…"></textarea><br>
+<button class="btn wa block" data-act="submit">💬 Place Order on WhatsApp</button>
+<p class="note">Delivery fees and final prices are confirmed on WhatsApp before payment.</p></div>
+<div class="box"><h2 style="color:var(--navy)">Order summary</h2><div id="colines"></div><div id="cotot"></div></div></div></div></section>
+<script src="config.js"></script><script src="products.js"></script><script src="names.js"></script><script src="app.js"></script>
+</body></html>
