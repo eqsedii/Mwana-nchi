@@ -14,15 +14,15 @@ function totals(){let t=0,quotes=0;cart.forEach(c=>{const p=prod(c.id),v=p.v[c.v
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2200)}
 function addCart(id,vi,q=1){q=Math.max(1,q|0);const f=cart.find(c=>c.id===id&&c.vi===vi);f?f.q+=q:cart.push({id,vi,q});save();renderCart();toast('Added to cart ✓')}
 /* ---- shell ---- */
-const nav=[['index.html','Home','home'],['products.html','Products','products'],['about.html','About','about'],['contact.html','Contact','contact']];
+const nav=[['./','Home','home'],['products','Products','products'],['about','About','about'],['contact','Contact','contact']];
 document.body.insertAdjacentHTML('afterbegin',`<div id="pl"><div class="pl-in"><img src="images/logo.jpg" alt=""></div></div>
-<header><div class="wrap nav"><a class="brand" href="index.html"><img src="images/logo.jpg" alt="Mwananchi logo"><span>MWANANCHI<small>SUPPLIES LIMITED</small></span></a>
+<header><div class="wrap nav"><a class="brand" href="./"><img src="images/logo.jpg" alt="Mwananchi logo"><span>MWANANCHI<small>SUPPLIES LIMITED</small></span></a>
 <nav class="menu" id="menu">${nav.map(n=>`<a href="${n[0]}" class="${page===n[2]?'on':''}">${n[1]}</a>`).join('')}</nav>
 <div class="hr"><button class="btn cartbtn sm" data-act="cart" aria-label="Cart">🛒 <b id="cc">0</b></button><button class="burger" id="bg" aria-label="Menu">☰</button></div></div></header>`);
 document.body.insertAdjacentHTML('beforeend',`
 <footer><div class="wrap"><div class="fg"><div><h4>Mwananchi Supplies Limited</h4><p>Build Better. Live Better.<br>Your trusted construction partner – quality materials, fair prices, reliable delivery countrywide.</p></div>
-<div><h4>Quick Links</h4>${nav.map(n=>`<a href="${n[0]}">${n[1]}</a>`).join('')}<a href="checkout.html">Checkout</a></div>
-<div><h4>Categories</h4>${C.slice(0,6).map(c=>`<a href="products.html?cat=${c.id}">${c.n}</a>`).join('')}</div>
+<div><h4>Quick Links</h4>${nav.map(n=>`<a href="${n[0]}">${n[1]}</a>`).join('')}<a href="checkout">Checkout</a></div>
+<div><h4>Categories</h4>${C.slice(0,6).map(c=>`<a href="products?cat=${c.id}">${c.n}</a>`).join('')}</div>
 <div><h4>Contact</h4><a href="https://wa.me/${M.whatsapp}" target="_blank">💬 WhatsApp: ${M.phoneDisplay}</a><a href="mailto:${M.email}">✉️ ${M.email}</a><a>📍 ${M.address}</a><a>🕒 ${M.hours}</a></div></div>
 <div class="cp">© ${new Date().getFullYear()} Mwananchi Supplies Limited. All rights reserved. Prices are indicative – confirmed on WhatsApp.</div></div></footer>
 <div class="ov" id="ov"></div>
@@ -43,7 +43,7 @@ const A={
  inc(b){const c=cart[+b.dataset.i];c.q++;save();renderCart()},
  dec(b){const c=cart[+b.dataset.i];c.q--;if(c.q<1)cart.splice(+b.dataset.i,1);save();renderCart()},
  del(b){cart.splice(+b.dataset.i,1);save();renderCart()},
- search(){const q=$('#hq').value.trim();location.href='products.html'+(q?'?q='+encodeURIComponent(q):'')},
+ search(){const q=$('#hq').value.trim();location.href='products'+(q?'?q='+encodeURIComponent(q):'')},
  submit(b){submitOrder()}
 };
 document.addEventListener('click',e=>{
@@ -92,12 +92,12 @@ function lines(){return cart.map((c,i)=>{const p=prod(c.id),v=p.v[c.vi];return `
 function totHTML(){const{t,quotes}=totals();return `<div class="tot"><span>Total</span><span>${M.currency} ${fmt(t)}</span></div>${quotes?`<p class="note">+ ${quotes} item(s) on quote – price confirmed on WhatsApp.</p>`:''}`}
 function renderCart(){$('#cc').textContent=count();
  $('#db').innerHTML=cart.length?lines():'<div class="empty">🛒<br>Your cart is empty.</div>';
- $('#df').innerHTML=cart.length?totHTML()+`<button class="btn block" style="margin-top:10px" data-act="go" data-href="checkout.html">Checkout →</button>`:'';
- const cl=$('#colines');if(cl){cl.innerHTML=cart.length?lines():'<div class="empty">Your cart is empty.<br><br><a class="btn" href="products.html">Browse products</a></div>';$('#cotot').innerHTML=cart.length?totHTML():''}}
+ $('#df').innerHTML=cart.length?totHTML()+`<button class="btn block" style="margin-top:10px" data-act="go" data-href="checkout">Checkout →</button>`:'';
+ const cl=$('#colines');if(cl){cl.innerHTML=cart.length?lines():'<div class="empty">Your cart is empty.<br><br><a class="btn" href="products">Browse products</a></div>';$('#cotot').innerHTML=cart.length?totHTML():''}}
 /* ---- page specific ---- */
 function reveal(){const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.1});$$('.rv:not(.in)').forEach(el=>io.observe(el))}
 if($('#feat')){$('#feat').innerHTML=P.filter(p=>p.hot).slice(0,8).map(cardHTML).join('')}
-if($('#catgrid')){$('#catgrid').innerHTML=C.map(c=>`<a class="cat rv" href="products.html?cat=${c.id}"><i>${c.i}</i>${c.n}</a>`).join('')}
+if($('#catgrid')){$('#catgrid').innerHTML=C.map(c=>`<a class="cat rv" href="products?cat=${c.id}"><i>${c.i}</i>${c.n}</a>`).join('')}
 if($('#plist')){const u=new URLSearchParams(location.search);let cat=u.get('cat')||'all',q=(u.get('q')||'').toLowerCase();
  $('#tools').innerHTML=`<button class="chip" data-c="all">All</button>`+C.map(c=>`<button class="chip" data-c="${c.id}">${c.i} ${c.n}</button>`).join('');
  const draw=()=>{$$('.chip').forEach(x=>x.classList.toggle('on',x.dataset.c===cat));const l=P.filter(p=>(cat==='all'||p.c===cat)&&(!q||(p.n+p.d).toLowerCase().includes(q)));
