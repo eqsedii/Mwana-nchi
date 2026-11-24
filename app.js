@@ -12,7 +12,7 @@ const img=(p,i=0)=>p.img.length?`images/p/${p.img[i]}.jpg`:'images/logo.jpg';
 const count=()=>cart.reduce((a,c)=>a+c.q,0);
 function totals(){let t=0,quotes=0;cart.forEach(c=>{const p=prod(c.id),v=p.v[c.vi];if(v.p==null)quotes++;else t+=v.p*c.q});return{t,quotes}}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2200)}
-function addCart(id,vi){const f=cart.find(c=>c.id===id&&c.vi===vi);f?f.q++:cart.push({id,vi,q:1});save();renderCart();toast('Added to cart ✓')}
+function addCart(id,vi,q=1){q=Math.max(1,q|0);const f=cart.find(c=>c.id===id&&c.vi===vi);f?f.q+=q:cart.push({id,vi,q});save();renderCart();toast('Added to cart ✓')}
 /* ---- shell ---- */
 const nav=[['index.html','Home','home'],['products.html','Products','products'],['about.html','About','about'],['contact.html','Contact','contact']];
 document.body.insertAdjacentHTML('afterbegin',`<div id="pl"><div class="pl-in"><img src="images/logo.jpg" alt=""></div></div>
@@ -36,7 +36,7 @@ $('#bg').onclick=()=>$('#menu').classList.toggle('open');
 /* ---- logo loader on every button ---- */
 function prep(b){if(!$('.ld',b)){b.insertAdjacentHTML('afterbegin','<span class="ld"><img src="images/logo.jpg" alt=""></span>')}}
 const A={
- add(b){const c=b.closest('.pc,.md'),s=$('select',c);addCart(b.dataset.id,s?+s.value:0)},
+ add(b){const c=b.closest('.pc,.md'),s=$('select',c),n=$('.qn',c);addCart(b.dataset.id,s?+s.value:0,n?+n.value:1)},
  view(b){openQV(b.dataset.id)},
  cart(){openDr(true)},
  go(b){location.href=b.dataset.href},
@@ -61,15 +61,25 @@ function openDr(o){$('#dr').classList.toggle('show',o);$('#ov').classList.toggle
 $('#dx').onclick=()=>openDr(false);
 $('#ov').onclick=()=>{openDr(false);$('#md').classList.remove('show');$('#ov').classList.remove('show')};
 function pricetxt(p,vi){const v=p.v[vi];return v.p==null?'<span class="pr">Request quote</span>':`<span class="pr">${M.currency} ${fmt(v.p)} <small>${p.u}</small></span>`}
-function cardHTML(p){const multi=p.v.length>1,lo=p.v[0].p;
- return `<article class="pc rv"><div class="im" data-act-v="${p.id}">${p.hot?'<span class="tag">POPULAR</span>':''}<img loading="lazy" class="${p.img.length?'':'logo'}" src="${img(p)}" alt="${p.n}"></div>
- <div class="pb"><h3>${p.n}</h3>${multi?`<select aria-label="Option">${p.v.map((v,i)=>`<option value="${i}">${v.l} – ${v.p==null?'Quote':fmt(v.p)}</option>`).join('')}</select>`:''}
- <div>${multi?`<span class="pr"><small>from</small> ${M.currency} ${fmt(Math.min(...p.v.filter(v=>v.p!=null).map(v=>v.p)))} <small>${p.u}</small></span>`:pricetxt(p,0)}</div>
+const unit=p=>p.v.length>1?p.u.replace(/\s*\(from\)/,''):p.u;
+function priceBox(p,vi,q){const v=p.v[vi];if(v.p==null)return `<span class="pr">Request quote</span>`;
+ return `<span class="pr" data-pr>${M.currency} ${fmt(v.p*q)} <small>${q>1?'for '+q+' · '+M.currency+' '+fmt(v.p)+' each':unit(p)}</small></span>`}
+function qtyBox(){return `<div class="qs"><button type="button" data-qd aria-label="Less">−</button><input class="qn" type="number" min="1" max="9999" value="1" inputmode="numeric" aria-label="Quantity"><button type="button" data-qu aria-label="More">+</button></div>`}
+function cardHTML(p){const multi=p.v.length>1;
+ return `<article class="pc rv" data-pid="${p.id}"><div class="im" data-act-v="${p.id}">${p.hot?'<span class="tag">POPULAR</span>':''}<img loading="lazy" class="${p.img.length?'':'logo'}" src="${img(p)}" alt="${p.n}"></div>
+ <div class="pb"><h3>${p.n}</h3>${multi?`<select class="pv" aria-label="Size / option">${p.v.map((v,i)=>`<option value="${i}">${v.l}</option>`).join('')}</select>`:''}
+ <div class="pw">${priceBox(p,0,1)}</div>${qtyBox()}
  <button class="btn sm ghost" data-act="view" data-id="${p.id}">Details</button><button class="btn sm" data-act="add" data-id="${p.id}">🛒 Add to Cart</button></div></article>`}
+/* live price: size / quantity change updates the price */
+function refreshPrice(c){const p=prod(c.dataset.pid||c.querySelector('[data-act=add]').dataset.id),s=$('select',c),n=$('.qn',c),w=$('.pw',c);if(!w)return;
+ const q=Math.max(1,Math.min(9999,parseInt(n.value)||1));w.innerHTML=priceBox(p,s?+s.value:0,q)}
+document.addEventListener('input',e=>{const c=e.target.closest('.pc,.md');if(c&&e.target.matches('select,.qn'))refreshPrice(c)});
+document.addEventListener('change',e=>{const c=e.target.closest('.pc,.md');if(c&&e.target.matches('.qn')){e.target.value=Math.max(1,Math.min(9999,parseInt(e.target.value)||1));refreshPrice(c)}});
+document.addEventListener('click',e=>{const d=e.target.closest('[data-qd],[data-qu]');if(!d)return;const c=d.closest('.pc,.md'),n=$('.qn',c);n.value=Math.max(1,Math.min(9999,(parseInt(n.value)||1)+(d.matches('[data-qd]')?-1:1)));refreshPrice(c)});
 function openQV(id){const p=prod(id),m=$('#md');
  m.innerHTML=`<button class="mx" id="mx">✕</button><div class="mg"><div><img class="main" id="mi" src="${img(p)}" alt="${p.n}"><div class="th">${p.img.map((n,i)=>`<img src="images/p/${n}.jpg" class="${i?'':'on'}" data-t="${i}" alt="">`).join('')}</div></div>
  <div style="display:flex;flex-direction:column;gap:10px"><h2 style="color:var(--navy)">${p.n}</h2><p style="color:var(--mut)">${p.d}</p>
- ${p.v.length>1?`<select style="padding:11px;border-radius:10px;border:1.5px solid #d5dcee" id="mv">${p.v.map((v,i)=>`<option value="${i}">${v.l} – ${v.p==null?'Quote':M.currency+' '+fmt(v.p)}</option>`).join('')}</select>`:pricetxt(p,0)}
+ ${p.v.length>1?`<select class="pv" style="padding:11px;border-radius:10px;border:1.5px solid #d5dcee" id="mv">${p.v.map((v,i)=>`<option value="${i}">${v.l}</option>`).join('')}</select>`:''}<div class="pw">${priceBox(p,0,1)}</div>${qtyBox()}
  <button class="btn" data-act="add" data-id="${p.id}">🛒 Add to Cart</button>
  <a class="btn wa" target="_blank" href="https://wa.me/${M.whatsapp}?text=${encodeURIComponent('Hello Mwananchi Supplies, I am interested in: '+p.n)}">💬 Ask on WhatsApp</a>
  <p class="note">Prices are indicative and confirmed on WhatsApp before payment. Product photos may be illustrative.</p></div></div>`;
@@ -111,6 +121,11 @@ function submitOrder(){
  const url=`https://wa.me/${M.whatsapp}?text=${encodeURIComponent(m)}`;
  $('#cobox').innerHTML=`<div class="box" style="text-align:center"><h2 style="color:var(--navy)">✅ Almost done!</h2><p style="margin:10px 0">Your order is ready. Send it on WhatsApp to confirm.</p><a class="btn wa" href="${url}" target="_blank">💬 Open WhatsApp</a></div>`;
  cart=[];save();renderCart();location.href=url}
+/* hero: embers + gentle pointer parallax */
+(function(){const h=$('#hero');if(!h)return;const e=$('.embers',h);
+ for(let i=0;i<22;i++){const d=document.createElement('i');d.style.left=Math.random()*100+'%';d.style.setProperty('--dx',(Math.random()*80-40)+'px');d.style.animationDuration=(5+Math.random()*7)+'s';d.style.animationDelay=(Math.random()*8)+'s';d.style.transform='scale('+(.6+Math.random()*1.4)+')';e.appendChild(d)}
+ const m=$('img.main',h);h.addEventListener('pointermove',ev=>{const r=h.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width-.5,y=(ev.clientY-r.top)/r.height-.5;h.style.setProperty('--px',x*-14+'px');h.style.setProperty('--py',y*-8+'px');$$('.hv',h).forEach(v=>v.style.translate=(x*16)+'px '+(y*10)+'px')});
+ $$('video',h).forEach(v=>{const p=v.play();p&&p.catch(()=>{})})})();
 /* counters */
 $$('[data-n]').forEach(el=>{const n=+el.dataset.n,io=new IntersectionObserver(es=>{if(es[0].isIntersecting){io.disconnect();let s=null;const st=t=>{s=s||t;const k=Math.min((t-s)/1400,1);el.textContent=Math.floor(n*k).toLocaleString()+(el.dataset.s||'');k<1&&requestAnimationFrame(st)};requestAnimationFrame(st)}});io.observe(el)});
 /* back to top */
