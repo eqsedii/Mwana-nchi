@@ -8,7 +8,7 @@ const page=document.body.dataset.page;
 let cart=[];try{cart=JSON.parse(localStorage.getItem('mwcart')||'[]')}catch(e){}
 const save=()=>{try{localStorage.setItem('mwcart',JSON.stringify(cart))}catch(e){}};
 const prod=id=>P.find(p=>p.id===id);
-const img=(p,i=0)=>p.img.length?`images/p/${p.img[i]}.jpg`:'images/logo.jpg';
+const img=(p,i=0)=>p.img.length?`images/p/${PHOTOS[p.img[i]][0]}.jpg`:'images/logo.jpg';
 const count=()=>cart.reduce((a,c)=>a+c.q,0);
 function totals(){let t=0,quotes=0;cart.forEach(c=>{const p=prod(c.id),v=p.v[c.vi];if(v.p==null)quotes++;else t+=v.p*c.q});return{t,quotes}}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2200)}
@@ -23,12 +23,12 @@ document.body.insertAdjacentHTML('beforeend',`
 <footer><div class="wrap"><div class="fg"><div><h4>Mwananchi Supplies Limited</h4><p>Build Better. Live Better.<br>Your trusted construction partner – quality materials, fair prices, reliable delivery countrywide.</p></div>
 <div><h4>Quick Links</h4>${nav.map(n=>`<a href="${n[0]}">${n[1]}</a>`).join('')}<a href="checkout">Checkout</a></div>
 <div><h4>Categories</h4>${C.slice(0,6).map(c=>`<a href="products?cat=${c.id}">${c.n}</a>`).join('')}</div>
-<div><h4>Contact</h4><a href="https://wa.me/${M.whatsapp}" target="_blank">💬 WhatsApp: ${M.phoneDisplay}</a><a href="mailto:${M.email}">✉️ ${M.email}</a><a>📍 ${M.address}</a><a>🕒 ${M.hours}</a></div></div>
+<div><h4>Contact</h4><a href="https://wa.me/${M.whatsapp}" target="_blank"><span class="wai"></span> WhatsApp: ${M.phoneDisplay}</a><a href="${M.facebook}" target="_blank" rel="noopener"><span class="fbi"></span> Facebook: Mwananchi Supplies</a><a href="mailto:${M.email}">✉️ ${M.email}</a><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(M.address)}" target="_blank" rel="noopener">📍 ${M.address}</a><a>🕒 ${M.hours}</a></div></div>
 <div class="cp">© ${new Date().getFullYear()} Mwananchi Supplies Limited. All rights reserved. Prices are indicative – confirmed on WhatsApp.</div></div></footer>
 <div class="ov" id="ov"></div>
 <aside class="dr" id="dr"><h3>Your Cart <button id="dx">✕</button></h3><div class="bd" id="db"></div><div class="ft" id="df"></div></aside>
 <div class="md" id="md"></div><div id="toast"></div>
-<div class="fab"><button id="up">↑</button><a href="https://wa.me/${M.whatsapp}?text=${encodeURIComponent('Hello Mwananchi Supplies, I need help with...')}" target="_blank" aria-label="WhatsApp">💬</a></div>
+<div class="fab"><button id="up">↑</button><a href="https://wa.me/${M.whatsapp}?text=${encodeURIComponent('Hello Mwananchi Supplies, I need help with...')}" target="_blank" aria-label="WhatsApp"><span class="wai"></span></a></div>
 <div class="sp" id="sp"></div>`);
 /* page loader */
 window.addEventListener('load',()=>setTimeout(()=>$('#pl').classList.add('hide'),450));setTimeout(()=>$('#pl').classList.add('hide'),3000);
@@ -77,11 +77,11 @@ document.addEventListener('input',e=>{const c=e.target.closest('.pc,.md');if(c&&
 document.addEventListener('change',e=>{const c=e.target.closest('.pc,.md');if(c&&e.target.matches('.qn')){e.target.value=Math.max(1,Math.min(9999,parseInt(e.target.value)||1));refreshPrice(c)}});
 document.addEventListener('click',e=>{const d=e.target.closest('[data-qd],[data-qu]');if(!d)return;const c=d.closest('.pc,.md'),n=$('.qn',c);n.value=Math.max(1,Math.min(9999,(parseInt(n.value)||1)+(d.matches('[data-qd]')?-1:1)));refreshPrice(c)});
 function openQV(id){const p=prod(id),m=$('#md');
- m.innerHTML=`<button class="mx" id="mx">✕</button><div class="mg"><div><img class="main" id="mi" src="${img(p)}" alt="${p.n}"><div class="th">${p.img.map((n,i)=>`<img src="images/p/${n}.jpg" class="${i?'':'on'}" data-t="${i}" alt="">`).join('')}</div></div>
+ m.innerHTML=`<button class="mx" id="mx">✕</button><div class="mg"><div><img class="main" id="mi" src="${img(p)}" alt="${p.n}"><div class="th">${p.img.map((n,i)=>`<img src="images/p/${PHOTOS[n][0]}.jpg" class="${i?'':'on'}" data-t="${i}" alt="${PHOTOS[n][1]}">`).join('')}</div></div>
  <div style="display:flex;flex-direction:column;gap:10px"><h2 style="color:var(--navy)">${p.n}</h2><p style="color:var(--mut)">${p.d}</p>
  ${p.v.length>1?`<select class="pv" style="padding:11px;border-radius:10px;border:1.5px solid #d5dcee" id="mv">${p.v.map((v,i)=>`<option value="${i}">${v.l}</option>`).join('')}</select>`:''}<div class="pw">${priceBox(p,0,1)}</div>${qtyBox()}
  <button class="btn" data-act="add" data-id="${p.id}">🛒 Add to Cart</button>
- <a class="btn wa" target="_blank" href="https://wa.me/${M.whatsapp}?text=${encodeURIComponent('Hello Mwananchi Supplies, I am interested in: '+p.n)}">💬 Ask on WhatsApp</a>
+ <a class="btn wa" target="_blank" href="https://wa.me/${M.whatsapp}?text=${encodeURIComponent('Hello Mwananchi Supplies, I am interested in: '+p.n)}"><span class="wai"></span> Ask on WhatsApp</a>
  <p class="note">Prices are indicative and confirmed on WhatsApp before payment. Product photos may be illustrative.</p></div></div>`;
  m.classList.add('show');$('#ov').classList.add('show');
  $('#mx').onclick=()=>{m.classList.remove('show');$('#ov').classList.remove('show')};
@@ -119,7 +119,7 @@ function submitOrder(){
  const nt=$('#fnote').value.trim();if(nt)m+=`\n*Notes:* ${nt}`;
  m+='\n\nPlease confirm availability, final price & delivery.';
  const url=`https://wa.me/${M.whatsapp}?text=${encodeURIComponent(m)}`;
- $('#cobox').innerHTML=`<div class="box" style="text-align:center"><h2 style="color:var(--navy)">✅ Almost done!</h2><p style="margin:10px 0">Your order is ready. Send it on WhatsApp to confirm.</p><a class="btn wa" href="${url}" target="_blank">💬 Open WhatsApp</a></div>`;
+ $('#cobox').innerHTML=`<div class="box" style="text-align:center"><h2 style="color:var(--navy)">✅ Almost done!</h2><p style="margin:10px 0">Your order is ready. Send it on WhatsApp to confirm.</p><a class="btn wa" href="${url}" target="_blank"><span class="wai"></span> Open WhatsApp</a></div>`;
  cart=[];save();renderCart();location.href=url}
 /* hero: embers + gentle pointer parallax */
 (function(){const h=$('#hero');if(!h)return;const e=$('.embers',h);
